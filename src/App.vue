@@ -1,12 +1,12 @@
 <template>
 <div id="app">
+        {{ info }}
+        <p>*************</p>
+        {{ infos }}
         <h2 style="font-family:Fahkwang;">Upload a File - Vuejs API Call</h2>
 
         <form enctype="multipart/form-data">
-
             <div class="form-horizontal">
-                <hr />
-
                 <div class="form-group">
                     <p class="control-label col-md-2" style="font-family:Fahkwang;">Language</p>
                     <div class="col-md-10">
@@ -62,7 +62,6 @@
                 <button type="button" v-on:click="upload()" class="btn btn-primary btn-lg" style="font-family:Fahkwang;width:25%;">Submit</button>
             </div>
         </form>
-        {{ message }}
     </div>
 
 </template>
@@ -73,7 +72,9 @@
         name: 'app',
         data() {
             return {
-                files: new FormData()
+                files: new FormData(),
+                info: null,
+                infos: null
             }
         },
         methods: {
@@ -81,11 +82,12 @@
                 this.files.append("file", fileList[0], fileList[0].name);
             },
             upload() {
-                axios({ method: "POST", "url": "http://mekonecampusapi.azurewebsites.net/api/pictures", "data": this.files }).then(result => {
-                    console.dir(result.data);
-                }, error => {
-                    console.error(error);
-                });
+              axios({ method: "POST", "url": "https://merryfairytales.azurewebsites.net/api/getSAS", "data": {'container': 'getsastoken'}, "headers": {'Content-Type': 'application/json'}})
+                .then(response => (this.info = response))
+                .catch(error => (this.info = error))
+              axios({ method: "POST", "url": "http://mekonecampusapi.azurewebsites.net/api/pictures", "data": this.files })
+                .then(response => (this.infos = response))
+                .catch(error => (this.infos = error));
             }
         }
     }
