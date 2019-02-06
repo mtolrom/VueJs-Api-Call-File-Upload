@@ -1,10 +1,9 @@
 <template>
 <div id="app">
-        {{ info }}
-        <p>*************</p>
+        {{$session.get('myI')}}
+        <br /><br />
         {{ infos }}
         <h2 style="font-family:Fahkwang;">Upload a File - Vuejs API Call</h2>
-
         <form enctype="multipart/form-data">
             <div class="form-horizontal">
                 <div class="form-group">
@@ -59,15 +58,19 @@
                 </div>
             </div>
             <div class="form-group">
-                <button type="button" v-on:click="upload()" class="btn btn-primary btn-lg" style="font-family:Fahkwang;width:25%;">Submit</button>
+                <button type="button" v-on:click="created()" class="btn btn-primary btn-lg" style="font-family:Fahkwang;width:25%;">Submit</button>
             </div>
         </form>
     </div>
-
 </template>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script>
+    import Vue from 'vue'
     import axios from "axios";
+    import VueSession from 'vue-session';
+    Vue.use(VueSession);
     export default {
         name: 'app',
         data() {
@@ -81,11 +84,22 @@
             fileChange(fileList) {
                 this.files.append("file", fileList[0], fileList[0].name);
             },
-            upload() {
+            created() {
               axios({ method: "POST", "url": "https://merryfairytales.azurewebsites.net/api/getSAS", "data": {'container': 'getsastoken'}, "headers": {'Content-Type': 'application/json'}})
-                .then(response => (this.info = response))
+                .then(response => {this.$session.set('myI',response.data.token);})
                 .catch(error => (this.info = error))
-              axios({ method: "POST", "url": "http://mekonecampusapi.azurewebsites.net/api/pictures", "data": this.files })
+              var myDate = new Date();
+              var myUrl = "https://demofunctionsmikal201901.blob.core.windows.net/getsastest/myFileMekone.jpg"+this.$session.get('myI');
+              axios({ method: "PUT",
+                  "url": myUrl,
+                  "data": this.files,
+                  "headers": {
+                      "x-ms-blob-type": "BlockBlob",
+                      "x-ms-date": myDate,
+                      "x-ms-version": "2018-03-28",
+                      "Content-Type": "multipart/form-data"},
+                      "ContentLength": this.files.length
+                  })
                 .then(response => (this.infos = response))
                 .catch(error => (this.infos = error));
             }
@@ -97,4 +111,7 @@
     #app {
     padding: 20px;
     }
+    @import "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css";
+    @import "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css";
+    @import "https://fonts.googleapis.com/css?family=Roboto|Josefin Sans|Quicksand|Julius Sans One|Niconne|Marcellus SC|Montserrat|Poiret One|EB Garamond|Forum|Arsenal|Parisienne|Fahkwang|Marmelad";
 </style>
